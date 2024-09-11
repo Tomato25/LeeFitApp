@@ -6,14 +6,20 @@ import {
   TouchableOpacity,
   View,
   Button,
-} from 'react-native';
-import { useState, useEffect } from 'react';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import * as ImagePicker from 'expo-image-picker';
-import { Image } from 'expo-image';
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import { useState, useEffect } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
+import Colors from "@/constants/Colors";
+import { defaultStyles } from "@/constants/Styles";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 
 export default function App() {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("");
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -32,89 +38,170 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 10,
-          marginTop:200
-        }}>
-        <TouchableOpacity onPress={() => pickImage()} style={{height:200, width:200, borderWidth:2, borderRadius:99, justifyContent:"center", alignItems:"center" }}>
-        {image ?         
-        <Image style={{ flex: 1, width: '100%', borderRadius:99}} contentFit="cover" source={{ uri: image }} /> : <Ionicons name="camera" size={75}/>}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            width: '90%',
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 10,
-            alignItems: 'center',
+    <View style={defaultStyles.container}>
+      <LinearGradient
+        colors={["#10123B", "#000000"]}
+        style={defaultStyles.background}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            justifyContent: "space-around",
+            alignItems: "center",
+            width: Dimensions.get("screen").width,
+            gap: 30,
+            flex: 1,
           }}
-          onPress={() => pickImage()}>
-          <Text>Pick an image from camera roll</Text>
-        </TouchableOpacity>
-        
-      </View>
-      <View
-        style={{ justifyContent: 'center', alignItems: 'center', gap: 10, width:"100%"}}>
-        <View style={{flexDirection:"row", justifyContent:"space-around",gap:20}}> 
-        <TouchableOpacity
-          style={{
-            width: '40%',
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 10,
-            alignItems: 'center',
-          }}>
-          <Text>Skip</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            width: '40%',
-            borderWidth: 1,
-            padding: 10,
-            borderRadius: 10,
-            alignItems: 'center',
-          }}>
-          <Text>Next</Text>
-        </TouchableOpacity>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
+        >
           <View
             style={{
-              height: 10,
-              width: 10,
-              borderRadius: 99,
-              borderWidth: 1,
-            }}></View>
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 20,
+              marginTop: 50,
+              width: "90%",
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => pickImage()}
+              style={{
+                height: 250,
+                width: 250,
+                borderWidth: 2,
+                borderRadius: 150,
+                justifyContent: "center",
+                alignItems: "center",
+                borderColor: Colors.light.orange,
+              }}
+            >
+              {image ? (
+                <Image
+                  style={{ flex: 1, width: "100%", borderRadius: 150 }}
+                  contentFit="cover"
+                  source={{ uri: image }}
+                />
+              ) : (
+                <Ionicons name="camera" size={75} color={Colors.light.orange} />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                borderWidth: 1,
+                padding: 10,
+                borderRadius: 10,
+                alignItems: "center",
+                backgroundColor: Colors.light.orange,
+                width: "60%",
+              }}
+              onPress={() => pickImage()}
+            >
+              <Text style={defaultStyles.btnText}>Choose an image</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={defaultStyles.card}>
+            <View style={styles.subtitle}>
+              <Text style={defaultStyles.btnOutlineText}>Name</Text>
+              <Text style={styles.valueText}>Stevan</Text>
+            </View>
+            <View style={styles.subtitle}>
+              <Text style={defaultStyles.btnOutlineText}>Last name</Text>
+              <Text style={styles.valueText}>Stevanovski</Text>
+            </View>
+            <View style={styles.subtitle}>
+              <Text style={defaultStyles.btnOutlineText}>Age</Text>
+              <Text style={styles.valueText}>24</Text>
+            </View>
+            <View style={styles.subtitle}>
+              <Text style={defaultStyles.btnOutlineText}>Weight</Text>
+              <Text style={styles.valueText}>75 kg</Text>
+            </View>
+            <View style={styles.subtitle}>
+              <Text style={defaultStyles.btnOutlineText}>Height</Text>
+              <Text style={styles.valueText}>180 cm</Text>
+            </View>
+          </View>
           <View
             style={{
-              height: 10,
-              width: 10,
-              borderRadius: 99,
-              borderWidth: 1,
-              backgroundColor: 'black',
-            }}></View>
-        </View>
-      </View>
-    </SafeAreaView>
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 10,
+              width: "100%",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                gap: 20,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  width: "40%",
+                  borderWidth: 1,
+                  padding: 10,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  borderColor: Colors.light.orange,
+                }}
+              >
+                <Text style={defaultStyles.btnOutlineText}>Skip</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.replace("/(tabs)")}
+                style={{
+                  width: "40%",
+                  borderWidth: 1,
+                  padding: 10,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  backgroundColor: Colors.light.orange,
+              
+                }}
+              >
+                <Text style={defaultStyles.btnText}>Next</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <View
+                style={{
+                  height: 10,
+                  width: 10,
+                  borderRadius: 99,
+                  borderWidth: 1,
+                }}
+              ></View>
+              <View
+                style={{
+                  height: 10,
+                  width: 10,
+                  borderRadius: 99,
+                  borderWidth: 1,
+                  backgroundColor: "black",
+                }}
+              ></View>
+            </View>
+          </View>
+        </ScrollView>
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flex: 1,
+  subtitle: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
   },
-  unitContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
+  subtitleText: {
+    color: Colors.light.orange,
+    fontFamily: "outfit-sb",
+    fontSize: 20,
+  },
+  valueText: {
+    color: Colors.light.lightblue,
+    fontSize: 16,
+    fontFamily: "outfit",
   },
 });

@@ -90,7 +90,7 @@ import { Link } from 'expo-router';
             </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity style={defaultStyles.btn}><Link href={"/(public)/personalInfoPageTwo"} style={defaultStyles.btnText}>Next</Link></TouchableOpacity>
+       <Link href={"/(public)/personalInfoPageTwo"} style={defaultStyles.btnOutlineText}>Next</Link>
         <View style={{flexDirection:"row", gap:10}}>
         <View style={{height:10, width:10, borderRadius:99, borderWidth:1, backgroundColor:Colors.light.orange}}></View>
         <View style={{height:10, width:10, borderRadius:99, borderWidth:1, backgroundColor:Colors.light.placeholderOrange}}></View>

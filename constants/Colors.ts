@@ -6,7 +6,8 @@ export default {
     orange: '#FF8B00',
     lightblue: '#00B0FF',
     blue: '#10123C',
-    placeholderOrange:"rgba(255, 139, 0, 0.6)"
+    placeholderOrange:"rgba(255, 139, 0, 0.6)",
+    placeholderBlue:"rgba( 0, 176, 255, 0.4)"
     
   },
   dark: {

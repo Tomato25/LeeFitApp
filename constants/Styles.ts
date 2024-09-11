@@ -5,9 +5,9 @@ export const defaultStyles = StyleSheet.create({
   inputField: {
     height: 50,
     borderBottomWidth:1,
-    //borderBottomColor: "#FF5733",
     color: Colors.light.orange,
-    backgroundColor: "#212145",
+    //backgroundColor: "#212145",
+    backgroundColor: Colors.light.blue,
     padding: 10,
     width: "90%",
     borderRadius: 8,
@@ -54,12 +54,14 @@ export const defaultStyles = StyleSheet.create({
     top: 0,
     height: "100%",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
+    width:"100%"
   },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    width: "100%"
     
   },
   card: {

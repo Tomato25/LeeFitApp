@@ -92,7 +92,7 @@ const register = () => {
           email: email,
           role: "user",
         });
-        router.replace("/(tabs)");
+        router.replace("/(public)/personalInfoPageOne");
       })
       .catch((error) => {
         switch (error.code) {
@@ -251,12 +251,9 @@ const register = () => {
                   <></>
                 )}
               </View>
-
-              <Link href={"/(public)/personalInfoPageOne"} style={{color: Colors.light.orange}}>nexttttt</Link>
-
-            {/*  <TouchableOpacity onPress={() => signUp()} style={defaultStyles.btn}>
+           <TouchableOpacity onPress={() => signUp()} style={defaultStyles.btn}>
                 <Text style={defaultStyles.btnText}>Sign up</Text>
-              </TouchableOpacity> */}
+            </TouchableOpacity>
       
 
           {/*      {pendingVerification && (

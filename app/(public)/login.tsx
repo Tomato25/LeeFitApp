@@ -27,23 +27,40 @@ import {
   query,
   where,
 } from "@firebase/firestore";
-import {useUserStore} from "@/store/sessionStore"
+import { useUserStore } from "@/store/sessionStore";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const login = () => {
-  
+  const [errorEmail, setErrorEmail] = useState(false);
+  const [errorPassword, setErrorPassword] = useState(false);
+  const [errorPasswordText, setErrorPasswordText] = useState("");
+  const [errorText, setErrorText] = useState("");
+
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
-  const {userInfo,setUserInfo} = useUserStore((state) => ({
+  const { userInfo, setUserInfo } = useUserStore((state) => ({
     userInfo: state.userInfo,
-    setUserInfo: state.setUserInfo
-  })
-  )
+    setUserInfo: state.setUserInfo,
+  }));
 
   let errorMessage;
 
-  const signIn = async () =>
+  const signIn = async () => {
+    if (!emailAddress) {
+      setErrorEmail(true);
+      setErrorText("Please enter valid email");
+    }
+
+    if (!password) {
+      setErrorPassword(true);
+      setErrorPasswordText("Please enter valid password");
+    }
+
+    if (!emailAddress || !password) {
+      return;
+    }
+
     signInWithEmailAndPassword(auth, emailAddress, password)
       .then(async (userCredential) => {
         // Signed in
@@ -65,35 +82,33 @@ const login = () => {
           router.replace("/(tabs)");
         } else if (userInfo.role == "admin") {
           router.replace("/(admin)");
-        };
+        }
       })
       .catch((error) => {
         switch (error.code) {
           case "auth/email-already-in-use":
             errorMessage = "Email already in use !";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
             break;
           case "auth/invalid-credential":
             errorMessage = "You have entered an invalid username or password";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
             break;
           case "auth/invalid-email":
             errorMessage = "You have entered an invalid username or password";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
             break;
           default:
             errorMessage = "Something went wrong !";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
             break;
         }
-        let toast = Toast.show(`❌ ${errorMessage}`, {
-          duration: Toast.durations.LONG,
-          position: Toast.positions.TOP + 25,
-          shadow: true,
-          animation: true,
-          hideOnPress: true,
-          delay: 0,
-          opacity: 1,
-          textColor: "#FF4545",
-          backgroundColor: "#f0f0f0",
-       
-        }); });
+      });
+  };
 
   return (
     <View style={styles.container}>
@@ -106,23 +121,44 @@ const login = () => {
               source={require("../../assets/images/athlete.png")}
             />
           </View>
+          <View style={styles.inputContainer}>
           <TextInput
             autoCapitalize="none"
             placeholder="Email"
             value={emailAddress}
             onChangeText={setEmailAddress}
             placeholderTextColor={Colors.light.placeholderOrange}
-            style={[defaultStyles.inputField, { marginBottom: 30 }]}
-          />
-
+            onFocus={() => setErrorEmail(false)}
+                  style={[
+                    defaultStyles.inputField,
+                    errorEmail ? { borderBottomColor: "#ff5733" } : null,
+                  ]}
+                />
+                {errorEmail ? (
+                  <Text style={styles.errorMessage}>{errorText}</Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
           <TextInput
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
             placeholderTextColor={Colors.light.placeholderOrange}
-            style={[defaultStyles.inputField, { marginBottom: 30 }]}
+            onFocus={() => setErrorPassword(false)}
+            style={[
+              defaultStyles.inputField,
+              errorPassword ? { borderBottomColor: "#ff5733" } : null,
+            ]}
           />
+          {errorPassword ? (
+            <Text style={styles.errorMessage}>{errorPasswordText}</Text>
+          ) : (
+            <></>
+          )}
+        </View>
 
           <TouchableOpacity style={defaultStyles.btn} onPress={signIn}>
             <Text style={defaultStyles.btnText}>Continue</Text>
@@ -234,6 +270,28 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     gap: 10,
+  },
+  errorMessage: {
+    color: "#ff5733",
+    fontFamily: "outfit",
+    padding: 5,
+    width: "90%",
+  },
+  inputContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 30
+  },
+  inputField: {
+    height: 50,
+    borderBottomWidth:1,
+    color: Colors.light.orange,
+    backgroundColor: Colors.light.blue,
+    padding: 10,
+    width: "90%",
+    borderRadius: 8,
+    fontFamily: "outfit",
   },
 });
 
