@@ -1,0 +1,84 @@
+import { StyleSheet } from "react-native";
+import Colors from "./Colors";
+
+export const defaultStyles = StyleSheet.create({
+  inputField: {
+    height: 44,
+    borderBottomWidth:1,
+    borderBottomColor: Colors.light.orange,
+    color: Colors.light.orange,
+    padding: 10,
+    width: "90%",
+  },
+  btn: {
+    backgroundColor: Colors.light.orange,
+    height: 50,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "90%",
+  },
+  btnText: {
+    color: "black",
+    fontSize: 16,
+    fontFamily: "outfit-b",
+  },
+  btnIcon: {
+    position: "absolute",
+    left: 16,
+  },
+  btnOutline: {
+    borderWidth: 1,
+    borderColor: Colors.light.orange,
+    height: 50,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    display: "flex",
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    width: "90%",
+  },
+  btnOutlineText: {
+    color: Colors.light.orange,
+    fontSize: 16,
+    fontFamily: "outfit-sb",
+  },
+  background: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    
+  },
+  card: {
+    width: "90%",
+    borderRadius: 10,
+    backgroundColor: Colors.light.blue,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    gap: 15,
+  },
+});
+
+
+/* inputField: {
+  height: 44,
+  borderWidth: 1,
+  borderColor: Colors.light.orange,
+  color: Colors.light.orange,
+  borderRadius: 8,
+  padding: 10,
+  width: "90%",
+}, */

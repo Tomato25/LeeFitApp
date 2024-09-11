@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import { Tabs,Stack } from "expo-router";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 export default function Layout() {
   return (
@@ -45,15 +46,7 @@ export default function Layout() {
           ),
         }}
       ></Tabs.Screen>
-      <Tabs.Screen
-        name="about"
-        options={{
-          title: "About",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="information" size={size} color={color} />
-          ),
-        }}
-      ></Tabs.Screen>
+      
        <Tabs.Screen
         name="booking"
         options={{
@@ -69,6 +62,15 @@ export default function Layout() {
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
+          ),
+        }}
+      ></Tabs.Screen>
+       <Tabs.Screen
+        name="workouts"
+        options={{
+          title: "Workouts",
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome6 name="dumbbell" size={size} color={color} />
           ),
         }}
       ></Tabs.Screen>
