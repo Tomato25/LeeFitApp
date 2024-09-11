@@ -1,128 +1,265 @@
-import { View, Text, TouchableOpacity,StyleSheet, TextInput, Pressable } from 'react-native'
-import React, { useState } from 'react'
-import { auth } from '@/firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router, Stack } from 'expo-router';
-import { Image } from "expo-image";
-import Colors from '@/constants/Colors';
-import { defaultStyles } from '@/constants/Styles';
-import { db } from '@/firebaseConfig'
-import { addDoc, collection, doc, setDoc } from '@firebase/firestore'
-import Toast from "react-native-root-toast";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import React, { useState } from "react";
+import { auth } from "@/firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link, router, Stack } from "expo-router";
+import Colors from "@/constants/Colors";
+import { defaultStyles } from "@/constants/Styles";
+import { db } from "@/firebaseConfig";
+import { addDoc, collection, doc, setDoc } from "@firebase/firestore";
 
 const register = () => {
-
-  const [repeatEmail, setRepeatEmail] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [repeatEmail, setRepeatEmail] = useState("");
+  const [errorRepeatEmail, setErrorRepeatEmail] = useState(false);
+  const [errorEmail, setErrorEmail] = useState(false);
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [errorRepeatPassword, setErrorRepeatPassword] = useState(false);
+  const [errorPassword, setErrorPassword] = useState(false);
+  const [errorPasswordText, setErrorPasswordText] = useState("");
+  const [errorText, setErrorText] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [errorFirstName, setErrorFirstName] = useState(false);
   const [lastName, setLastName] = useState("");
+  const [errorLastName, setErrorLastName] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
 
-  const usersRef = collection(db, "users")
+  const isPasswordConfirmed = (password: String, repeatPassword: String) => {
+    if (password && repeatPassword && password === repeatPassword) return true;
+    return false;
+  };
+
+  const isEmailConfirmed = (email: String, repeatEmail: String) => {
+    if (email && repeatEmail && email === repeatEmail) return true;
+    return false;
+  };
+
+  const usersRef = collection(db, "users");
   let errorMessage;
-  const signUp = () =>  createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-
-    const userID = userCredential.user.uid;
-
-    setDoc(doc(usersRef, `${userID}`), {id: userID, firstName: firstName, lastName: lastName,  email:email, role:"user"})
-    router.replace("/(tabs)");
-  })
-  .catch((error) => {
-    switch (error.code) {
-      case "auth/email-already-in-use":
-        errorMessage = "Email already in use !";
-        break;
-      case "auth/invalid-credential":
-        errorMessage = "You have entered an invalid username or password";
-        break;
-      case "auth/invalid-email":
-        errorMessage = "Please enter valid email address";
-        break;
-      default:
-        errorMessage = "Something went wrong !";
-        break;
+  const signUp = () => {
+    if (!isPasswordConfirmed(password, repeatPassword)) {
+      setErrorRepeatPassword(true);
     }
-    let toast = Toast.show(`❌ ${errorMessage}`, {
-      duration: Toast.durations.LONG,
-      position: Toast.positions.TOP+25,
-      shadow: true,
-      animation: true,
-      hideOnPress: true,
-      delay: 0,
-      opacity: 1,
-      textColor: "#FF4545",
-      backgroundColor: "#f0f0f0"
-    });
-  });
 
+    if (!isEmailConfirmed(password, repeatPassword)) {
+      setErrorRepeatEmail(true);
+    }
+
+    if(!firstName){
+      setErrorFirstName(true)
+    }
+    if(!lastName){
+      setErrorLastName(true)
+    }
+    if(!email){
+      setErrorEmail(true);
+      setErrorText("Please enter valid email")
+    }
+
+    if(!password){
+      setErrorPassword(true);
+      setErrorPasswordText("Please enter valid password")
+    }
+
+    if (
+      !isPasswordConfirmed(password, repeatPassword) ||
+      !isEmailConfirmed(email, repeatEmail) ||
+      !firstName ||
+      !lastName
+    ) {
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const userID = userCredential.user.uid;
+
+        setDoc(doc(usersRef, `${userID}`), {
+          id: userID,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          role: "user",
+        });
+        router.replace("/(tabs)");
+      })
+      .catch((error) => {
+        switch (error.code) {
+          case "auth/email-already-in-use":
+            errorMessage = "Email already in use!";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
+            break;
+          case "auth/invalid-credential":
+            errorMessage = "You have entered an invalid username or password";
+
+            break;
+          case "auth/invalid-email":
+            errorMessage = "Please enter valid email address";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
+            break;
+          case "auth/weak-password":
+            errorMessage = "Please choose a stronger password";
+            setErrorPassword(true);
+            setErrorText(errorMessage);
+            break;
+          default:
+            errorMessage = "Something went wrong !";
+            break;
+        }
+        console.log(error.code + errorMessage);
+      });
+  };
 
   return (
     <View style={styles.container}>
       <LinearGradient colors={["#10123B", "#000000"]} style={styles.background}>
-        <Stack.Screen options={{ headerBackVisible: !pendingVerification }} />
-        <View style={[styles.container, { width: "90%", gap: 30 }]}>
-          {!pendingVerification && (
-            <>
-            <TextInput
-                autoCapitalize="none"
-                placeholder="John"
-                placeholderTextColor={Colors.light.orange}
-                value={firstName}
-                onChangeText={setFirstName}
-                style={defaultStyles.inputField}
-              />
-              <TextInput
-                autoCapitalize="none"
-                placeholder="Doe"
-                placeholderTextColor={Colors.light.orange}
-                value={lastName}
-                onChangeText={setLastName}
-                style={defaultStyles.inputField}
-              />
-              <TextInput
-                autoCapitalize="none"
-                placeholder="Email"
-                placeholderTextColor={Colors.light.orange}
-                value={email}
-                onChangeText={setEmail}
-                style={defaultStyles.inputField}
-              />
-              <TextInput
-                autoCapitalize="none"
-                placeholder="Repeat Email"
-                placeholderTextColor={Colors.light.orange}
-                value={repeatEmail}
-                onChangeText={setRepeatEmail}
-                style={defaultStyles.inputField}
-              />
-              <TextInput
-                placeholder="Password"
-                value={password}
-                placeholderTextColor={Colors.light.orange}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={defaultStyles.inputField}
-              />
-              <TextInput
-                placeholder="Repeat Password"
-                value={repeatPassword}
-                placeholderTextColor={Colors.light.orange}
-                onChangeText={setRepeatPassword}
-                secureTextEntry
-                style={defaultStyles.inputField}
-              />
+        <ScrollView contentContainerStyle={{ alignItems: "center", width: Dimensions.get("screen").width, gap: 30, paddingTop:60 }}>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  autoCapitalize="none"
+                  placeholder="John"
+                  placeholderTextColor={Colors.light.placeholderOrange}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  onFocus={() => setErrorFirstName(false)}
+                  style={[
+                    defaultStyles.inputField,
+                    errorFirstName ? { borderBottomColor: "#ff5733" } : null,
+                  ]}
+                />
+                {errorFirstName ? (
+                  <Text style={styles.errorMessage}>Please enter first name</Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  autoCapitalize="none"
+                  placeholder="Doe"
+                  placeholderTextColor={Colors.light.placeholderOrange}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  onFocus={() => setErrorLastName(false)}
 
-              <Pressable onPress={() => signUp()} style={defaultStyles.btn}>
-                <Text>Sign up</Text>
-              </Pressable>
-            </>
-          )}
+                  style={[
+                    defaultStyles.inputField,
+                    errorLastName ? { borderBottomColor: "#ff5733" } : null,
+                  ]}
+                />
+                 {errorLastName ? (
+                  <Text style={styles.errorMessage}>Please enter last name</Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
 
-     {/*      {pendingVerification && (
+                <TextInput
+                  autoCapitalize="none"
+                  placeholder="Email"
+                  placeholderTextColor={Colors.light.placeholderOrange}
+                  value={email}
+                  onChangeText={setEmail}
+                  onFocus={() => setErrorEmail(false)}
+
+                  style={[
+                    defaultStyles.inputField,
+                    errorEmail ? { borderBottomColor: "#ff5733" } : null,
+                  ]}
+                />
+                {errorEmail ? (
+                  <Text style={styles.errorMessage}>{errorText}</Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  autoCapitalize="none"
+                  placeholder="Repeat Email"
+                  placeholderTextColor={Colors.light.placeholderOrange}
+                  value={repeatEmail}
+                  onChangeText={setRepeatEmail}
+                  onFocus={() => setErrorRepeatEmail(false)}
+
+                  style={[
+                    defaultStyles.inputField,
+                    errorRepeatEmail ? { borderBottomColor: "#ff5733" } : null,
+                  ]}
+                />
+                {errorRepeatEmail ? (
+                  <Text style={styles.errorMessage}>Emails do not match</Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Password"
+                  value={password}
+                  placeholderTextColor={Colors.light.placeholderOrange}
+                  onChangeText={setPassword}
+                  onFocus={() => setErrorPassword(false)}
+
+                  secureTextEntry
+                  style={[
+                    defaultStyles.inputField,
+                    errorPassword ? { borderBottomColor: "#ff5733" } : null,
+                  ]}
+                />
+                {errorPassword ? (
+                  <Text style={styles.errorMessage}>{errorPasswordText}</Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Repeat Password"
+                  value={repeatPassword}
+                  placeholderTextColor={Colors.light.placeholderOrange}
+                  onChangeText={setRepeatPassword}
+                  onFocus={() => setErrorRepeatPassword(false)}
+                  secureTextEntry
+                  style={[
+                    defaultStyles.inputField,
+                    errorRepeatPassword
+                      ? { borderBottomColor: "#ff5733" }
+                      : null,
+                  ]}
+                />
+                {errorRepeatPassword ? (
+                  <Text style={styles.errorMessage}>
+                    Passwords do not match
+                  </Text>
+                ) : (
+                  <></>
+                )}
+              </View>
+
+              <Link href={"/(public)/personalInfoPageOne"} style={{color: Colors.light.orange}}>nexttttt</Link>
+
+            {/*  <TouchableOpacity onPress={() => signUp()} style={defaultStyles.btn}>
+                <Text style={defaultStyles.btnText}>Sign up</Text>
+              </TouchableOpacity> */}
+      
+
+          {/*      {pendingVerification && (
             <>
               <View style={styles.container}>
                 <TextInput
@@ -143,7 +280,7 @@ const register = () => {
               </TouchableOpacity>
             </>
           )} */}
-        </View>
+        </ScrollView>
       </LinearGradient>
     </View>
   );
@@ -157,7 +294,8 @@ const styles = StyleSheet.create({
     top: 0,
     height: "100%",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    width:"100%"
   },
 
   container: {
@@ -171,9 +309,18 @@ const styles = StyleSheet.create({
     width: 400,
     height: "100%",
   },
-  imageContainer: {
-    height: "50%",
+
+  errorMessage: {
+    color: "#ff5733",
+    fontFamily: "outfit",
+    padding: 5,
+    width: "90%",
+  },
+  inputContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 
-export default register
+export default register;

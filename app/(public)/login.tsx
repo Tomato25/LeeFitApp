@@ -111,7 +111,7 @@ const login = () => {
             placeholder="Email"
             value={emailAddress}
             onChangeText={setEmailAddress}
-            placeholderTextColor={Colors.light.orange}
+            placeholderTextColor={Colors.light.placeholderOrange}
             style={[defaultStyles.inputField, { marginBottom: 30 }]}
           />
 
@@ -120,7 +120,7 @@ const login = () => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholderTextColor={Colors.light.orange}
+            placeholderTextColor={Colors.light.placeholderOrange}
             style={[defaultStyles.inputField, { marginBottom: 30 }]}
           />
 

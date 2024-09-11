@@ -3,12 +3,15 @@ import Colors from "./Colors";
 
 export const defaultStyles = StyleSheet.create({
   inputField: {
-    height: 44,
+    height: 50,
     borderBottomWidth:1,
-    borderBottomColor: Colors.light.orange,
+    //borderBottomColor: "#FF5733",
     color: Colors.light.orange,
+    backgroundColor: "#212145",
     padding: 10,
     width: "90%",
+    borderRadius: 8,
+    fontFamily: "outfit",
   },
   btn: {
     backgroundColor: Colors.light.orange,
