@@ -254,6 +254,7 @@ const register = () => {
            <TouchableOpacity onPress={() => signUp()} style={defaultStyles.btn}>
                 <Text style={defaultStyles.btnText}>Sign up</Text>
             </TouchableOpacity>
+         <Link href={"/(public)/personalInfoPageOne"}><Text style={{color: "white"}}>Next</Text></Link>
       
 
           {/*      {pendingVerification && (

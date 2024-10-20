@@ -66,14 +66,17 @@ export default function Layout() {
         }}
       ></Tabs.Screen>
        <Tabs.Screen
+
         name="workouts"
         options={{
           title: "Workouts",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <FontAwesome6 name="dumbbell" size={size} color={color} />
           ),
         }}
       ></Tabs.Screen>
+    
     </Tabs>
   );
 }

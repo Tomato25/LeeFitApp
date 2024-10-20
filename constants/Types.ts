@@ -9,3 +9,6 @@ export default interface timeListType {
     id: string | number[]
   }
 
+  export default interface weightRangeType {
+    weightRange: number[]
+  }

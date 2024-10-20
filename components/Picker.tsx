@@ -1,120 +1,95 @@
-import Colors from '@/constants/Colors';
-import React, { useState, useEffect, useRef } from 'react';
-import { SafeAreaView, FlatList, View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import uuid from 'react-native-uuid';
+import Colors from "@/constants/Colors";
+import React, { useState, useEffect, useRef } from "react";
+import { FlatList, View, Text, TouchableOpacity, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
 
-export default function PickerComponent() {
-  const [timeList, setTimeList] = useState([]);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const flatListRef = useRef(null);
+interface PickerComponentProps {
+  data: (number)[]; // Accept an array of numbers as props
+}
 
-  const ITEM_HEIGHT = 40; // Set the height of each item to control scroll behavior
-  const VISIBLE_ITEMS = 3; // Number of visible items in the picker
+export default function PickerComponent({ data }: PickerComponentProps) {
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null); // Store the selected number
+  const flatListRef = useRef<FlatList<number>>(null); // Ref for FlatList
 
+  const ITEM_HEIGHT = 40; // Set the height of each item
+  const VISIBLE_ITEMS = 3; // Number of visible items
+
+  // Scroll to the middle item on component mount
   useEffect(() => {
-    getTime();
-  }, []);
-
-  useEffect(() => {
-    if (timeList.length > 0) {
-      // Automatically select the middle item when the time list is set
-      const middleIndex = Math.floor(timeList.length / 2);
-      setSelectedTime(timeList[middleIndex].id);
-      scrollToIndex(middleIndex);
+    if (data.length > 0) {
+      const middleIndex = Math.floor(data.length / 2);
+      setSelectedNumber(data[middleIndex]);
+      scrollToIndex(middleIndex, false); // Do not animate the first scroll
     }
-  }, [timeList]);
+  }, [data]);
 
-  const getTime = () => {
-    const timeList = [];
-    for (let i = 8; i < 12; i++) {
-      timeList.push({
-        time: i + ':00 AM',
-        id: uuid.v4(),
-      });
-      timeList.push({
-        time: i + ':30 AM',
-        id: uuid.v4(),
-      });
-    }
-    timeList.push({
-      time: 12 + ':00 PM',
-      id: uuid.v4(),
-    });
-    timeList.push({
-      time: 12 + ':30 PM',
-      id: uuid.v4(),
-    });
-    for (let i = 1; i <= 6; i++) {
-      timeList.push({
-        time: i + ':00 PM',
-        id: uuid.v4(),
-      });
-      timeList.push({
-        time: i + ':30 PM',
-        id: uuid.v4(),
-      });
-    }
-    setTimeList(timeList);
-  };
-
-  const scrollToIndex = (index) => {
-    if (flatListRef.current) {
+  const scrollToIndex = (index: number, animated = true) => {
+    if (flatListRef.current && index >= 0 && index < data.length) {
       flatListRef.current.scrollToIndex({
-        index: index,
-        animated: true,
+        index,
+        animated,
         viewPosition: 0.5, // Center the item
       });
+    } else {
+      console.warn(
+        `scrollToIndex out of range: requested index ${index} is out of 0 to ${
+          data.length - 1
+        }`
+      );
     }
   };
 
-  const handleScrollEnd = (event) => {
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / 40) + 1; // Calculate the index of the item closest to the center
-    const item = timeList[index];
-    setSelectedTime(item.id);
+    const index = Math.round(offsetY / ITEM_HEIGHT); // Calculate the index of the item closest to the center
 
-    // Scroll to ensure the item is centered
-    scrollToIndex(index);
-    console.log(item.time)
+    // Ensure the index is within valid bounds
+    if (index >= 0 && index < data.length) {
+      const selectedItem = data[index+1];
+      setSelectedNumber(selectedItem);
+      console.log(`Selected Item: ${selectedItem}`); // Log the selected number
+    } else {
+      console.warn(`handleScrollEnd: Calculated index ${index} is out of bounds`);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Time</Text>
+    <View style={styles.pickerWrapper}>
+      <FlatList
+        ref={flatListRef}
+        data={data} // Use the number array as data
+        keyExtractor={(item) => item.toString()} // Use the number itself as the key
+        renderItem={({ item, index }) => (
+          <TouchableOpacity onPress={() => scrollToIndex(index)}>
+            <View style={styles.itemContainer}>
+              <Text
+                style={[
+                  styles.itemText,
+                  selectedNumber === item && styles.selectedItemText,
+                ]}
+              >
+                {item}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        getItemLayout={(_, index) => ({
+          length: ITEM_HEIGHT,
+          offset: ITEM_HEIGHT * index,
+          index,
+        })}
+        snapToInterval={ITEM_HEIGHT} // Snap to each item
+        decelerationRate="fast"
+        showsVerticalScrollIndicator={false}
+        onMomentumScrollEnd={handleScrollEnd} // Detect when scrolling stops
+        initialNumToRender={VISIBLE_ITEMS}
+        style={styles.flatList}
+      />
 
-      <View style={styles.pickerWrapper}>
-        <FlatList
-          ref={flatListRef}
-          data={timeList}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <TouchableOpacity onPress={() => scrollToIndex(index)}>
-              <View style={[styles.itemContainer]}>
-                <Text style={[styles.itemText, selectedTime === item.id && styles.selectedItemText]}>
-                  {item.time}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-          getItemLayout={(data, index) => ({
-            length: ITEM_HEIGHT,
-            offset: ITEM_HEIGHT * index,
-            index,
-          })}
-          snapToInterval={ITEM_HEIGHT} // Snap to each item
-          decelerationRate="fast"
-          showsVerticalScrollIndicator={false}
-          onMomentumScrollEnd={handleScrollEnd} // Detect when scrolling stops
-          initialNumToRender={VISIBLE_ITEMS}
-          style={styles.flatList}
-        />
-
-        {/* Overlay to highlight the selected item */}
-        <View style={styles.overlay}>
-          <View style={styles.overlayLine} />
-        </View>
+      {/* Overlay to highlight the selected item */}
+      <View style={styles.overlay}>
+        <View style={styles.overlayLine} />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -130,8 +105,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   pickerWrapper: {
-    height: 40 * 3, // Height of the picker (5 items visible)
-    width: Dimensions.get('window').width * 0.8,
+    height: 120, // Height of the picker (5 items visible)
+    width: 150,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -146,11 +121,14 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 18,
     color: Colors.light.placeholderBlue,
+    fontFamily: "outfit"
   },
   selectedItemText: {
     fontSize: 20,
     color: '#ff8c00',
     fontWeight: 'bold',
+    fontFamily: "outfit-sb"
+
   },
   overlay: {
     position: 'absolute',
@@ -163,7 +141,7 @@ const styles = StyleSheet.create({
   },
   overlayLine: {
     height: 40,
-    width: '40%',
+    width: '60%',
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: '#ff8c00',
