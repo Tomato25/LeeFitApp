@@ -56,7 +56,7 @@ export default function RootLayout() {
 
   useEffect(() => {
    
-    const inTabsGroup = segments[0] === "(auth)";
+    const inTabsGroup = segments[0] === "(tabs)";
 
     if (user && !inTabsGroup && (userInfo.role === "user")) {
       router.replace("/(tabs)/");      

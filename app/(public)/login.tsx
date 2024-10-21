@@ -7,9 +7,9 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import Colors from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,16 +17,13 @@ import { Link, router } from "expo-router";
 import { defaultStyles } from "@/constants/Styles";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
-import Toast from "react-native-root-toast";
 import {
   collection,
   getDocs,
   onSnapshot,
   query,
   where,
-} from "@firebase/firestore";
+} from "firebase/firestore";
 import { useUserStore } from "@/store/sessionStore";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -66,7 +63,7 @@ const login = () => {
         // Signed in
         const user = userCredential.user;
 
-        const usersRef = collection(db, "users");
+        const usersRef = collection(db, "users")
         const q = query(usersRef, where("id", "==", user.uid));
         console.log(user);
 
@@ -85,6 +82,7 @@ const login = () => {
         }
       })
       .catch((error) => {
+        console.log(error)
         switch (error.code) {
           case "auth/email-already-in-use":
             errorMessage = "Email already in use !";
