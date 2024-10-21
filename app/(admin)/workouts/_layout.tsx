@@ -6,7 +6,7 @@ const WorkoutsLayout = () => {
   return (
     <Stack>
       <Stack.Screen
-        name="workouts"
+        name="workoutIndex"
         options={{
           headerShadowVisible: false,
           headerTitleStyle: {

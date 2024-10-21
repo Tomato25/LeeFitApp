@@ -8,7 +8,7 @@ import Colors from "@/constants/Colors";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 
-const workouts = () => {
+const workoutIndex = () => {
   return (
     <View style={defaultStyles.container}>
       <LinearGradient
@@ -57,4 +57,4 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
 });
-export default workouts;
+export default workoutIndex;
