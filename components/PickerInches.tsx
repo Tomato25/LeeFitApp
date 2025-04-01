@@ -3,13 +3,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { FlatList, View, Text, TouchableOpacity, NativeScrollEvent, NativeSyntheticEvent, StyleSheet } from "react-native";
 
 interface PickerComponentProps {
-  data: (number)[];
   onValueSelected: (value: number) => void; // Accept an array of numbers as props
 }
 
-export default function PickerComponent({ data, onValueSelected }: PickerComponentProps) {
+export default function PickerInchesComponent({onValueSelected }: PickerComponentProps) {
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null); // Store the selected number
   const flatListRef = useRef<FlatList<number>>(null); // Ref for FlatList
+
+  const data = Array.from({ length: 12 }, (_, i) => i + 1).concat('');
+
 
   const ITEM_HEIGHT = 40; // Set the height of each item
   const VISIBLE_ITEMS = 3; // Number of visible items
@@ -49,7 +51,6 @@ export default function PickerComponent({ data, onValueSelected }: PickerCompone
       setSelectedNumber(selectedItem);
       console.log(`Selected Item: ${selectedItem}`); // Log the selected number
       onValueSelected(selectedItem!)
-      console.log(selectedNumber)
     } else {
       console.warn(`handleScrollEnd: Calculated index ${index} is out of bounds`);
     }

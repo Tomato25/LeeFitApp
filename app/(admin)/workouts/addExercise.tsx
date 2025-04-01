@@ -8,24 +8,30 @@ import {
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { defaultStyles } from "@/constants/Styles";
-
 import Colors from "@/constants/Colors";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import { Image } from "expo-image";
 import { db, storage } from "@/firebaseConfig";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import WorkoutTags from "@/components/workoutTags";
+import VideoPicker from "@/components/ImagePicker";
+import uuid from "react-native-uuid";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 
 const addExercise = () => {
   const [image, setImage] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [exerciseTitle, setExerciseTitle] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const exerciseID = uuid.v4();
 
+  // Function to pick an image from the gallery
   async function pickImage() {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos, // here it is where we specify the allow format
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos, // Specify format
       allowsEditing: true,
       aspect: [3, 4],
       quality: 1,
@@ -33,50 +39,67 @@ const addExercise = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      // to upload image see the next function
-      await uploadImage(result.assets[0].uri, "videos");
     }
   }
 
+  // Function to upload the image and return the download URL
   async function uploadImage(uri, fileType) {
     const response = await fetch(uri);
     const blob = await response.blob();
-    const storageRef = ref(storage, "Stuff/" + new Date().getTime());
-
+    const storageRef = ref(storage, "Exercises/" + new Date().getTime());
     const uploadTask = uploadBytesResumable(storageRef, blob);
 
-    // listen for events
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log("Upload is " + progress + "% done");
-      },
-      (error) => {
-        // handle error
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-          console.log("File available at", downloadURL);
-          // save record
-          await saveRecord(fileType, downloadURL, new Date().toISOString());
-          setImage("");
-        });
-      }
-    );
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+        },
+        (error) => {
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setImageUrl(downloadURL); // Update state
+          resolve(downloadURL);
+        }
+      );
+    });
   }
 
-  async function saveRecord(fileType, url, createdAt) {
+  // Function to save the exercise to Firestore
+  async function submitExercise() {
+    if (!exerciseTitle) {
+      console.log("Please name the exercise");
+      return;
+    }
+
     try {
-      const docRef = await addDoc(collection(db, "files"), {
-        fileType,
-        url,
-        createdAt,
+      // Wait for the image upload and get the URL
+      const downloadURL = await uploadImage(image, "videos");
+      console.log("Image uploaded to:", downloadURL);
+
+      await saveExerciseData(downloadURL);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  }
+
+  // Function to save exercise data in Firestore
+  async function saveExerciseData(imageUrl) {
+    try {
+      await setDoc(doc(collection(db, "exercises"), exerciseID), {
+        id: exerciseID,
+        exerciseTitle: exerciseTitle,
+        tags: selectedTags,
+        imageUrl: imageUrl, // Ensure this is a string
       });
-      console.log("document saved correctly", docRef.id);
-    } catch (e) {
-      console.log(e);
+
+      console.log(`${exerciseTitle} is successfully added to DB`);
+      setImage(""); // Reset image after submission
+    } catch (error) {
+      console.error("Error saving document:", error);
     }
   }
 
@@ -84,10 +107,7 @@ const addExercise = () => {
     <View style={defaultStyles.container}>
       <LinearGradient
         colors={["#10123B", "#000000"]}
-        style={[
-          defaultStyles.background,
-          { justifyContent: "space-between", gap: 70 },
-        ]}
+        style={[defaultStyles.background, { justifyContent: "space-between", gap: 70 }]}
       >
         <TextInput
           autoCapitalize="none"
@@ -97,35 +117,31 @@ const addExercise = () => {
           placeholderTextColor={Colors.light.placeholderOrange}
           style={styles.inputField}
         />
+
         <TouchableOpacity
-          onPress={() => pickImage()}
+          onPress={pickImage}
           style={{
-            height: 250,
-            width: 250,
-            borderWidth: 2,
-            borderRadius: 150,
+            height: 175,
+            width: "75%",
+            borderWidth: 1,
+            borderRadius: 25,
             justifyContent: "center",
             alignItems: "center",
             borderColor: Colors.light.orange,
           }}
         >
           {image ? (
-            <Image
-              style={{ flex: 1, width: "100%", borderRadius: 150 }}
-              contentFit="cover"
-              source={{ uri: image }}
-            />
+            <Image style={{ flex: 1, width: "100%", borderRadius: 25 }} contentFit="cover" source={{ uri: image }} />
           ) : (
             <Ionicons name="camera" size={75} color={Colors.light.orange} />
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.btn}>
+
+        <WorkoutTags selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+
+        <TouchableOpacity onPress={submitExercise} style={styles.btn}>
           <Text style={defaultStyles.btnText}>Add an exercise</Text>
-          <Ionicons
-            name="add-circle-outline"
-            size={24}
-            color={Colors.light.blue}
-          />
+          <Ionicons name="add-circle-outline" size={24} color={Colors.light.blue} />
         </TouchableOpacity>
       </LinearGradient>
     </View>

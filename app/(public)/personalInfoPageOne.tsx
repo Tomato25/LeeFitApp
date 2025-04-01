@@ -1,14 +1,10 @@
 import {
   Text,
-  SafeAreaView,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   View,
-  ScrollView,
   Dimensions,
   Modal,
-  Pressable,
 } from "react-native";
 import { useState, useEffect } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -20,29 +16,22 @@ import { Link } from "expo-router";
 import PickerComponent from "@/components/Picker";
 import { useRegInfoStore } from "@/store/sessionStore";
 import DoBPicker from "@/components/DoB";
-import dayjs from "dayjs";
+import PickerInchesComponent from "@/components/PickerInches";
 
-interface WeightRangeType {
-  weightRange: number[]; // weightRange is an array of numbers
-}
 
 export default function App() {
   const [weightRange, setWeightRange] = useState<number[]>([]); // Fix: define the type of weightRange
   const [heightRange, setHeightRange] = useState<number[]>([]); // Fix: define the type of weightRange
 
   const [gender, setGender] = useState<string>("");
-  const [dateOfBirth, setDateOfBirth] = useState<Date>(new Date());
-  const inches = Array.from({ length: 12 }, (_, i) => i + 1).concat('');
-
-
-  
-  const now = dayjs().format("DD-MM-YYYY")
 
   const {
     userWeight,
     setUserWeight,
     userHeight,
     setUserHeight,
+    userHeightIn,
+    setUserHeightIn,
     userUnits,
     setUserUnits,
     modalVisible,
@@ -68,6 +57,17 @@ export default function App() {
       setHeightRange(Array.from({ length: 101 }, (_, i) => i + 130)); // Fix: Adjust the type for weightRange
 
     }
+  };
+
+  const handleWeightSelection = (value) => {
+    setUserWeight(value);
+  };
+  
+  const handleHeightSelection = (value) => {
+    setUserHeight(value);
+  };
+  const handleHeightInSelection = (value) => {
+    setUserHeightIn(value);
   };
 
 
@@ -153,7 +153,7 @@ export default function App() {
               height: 120,
             }}
           >
-              <PickerComponent data={heightRange} />
+              <PickerComponent data={heightRange} onValueSelected={handleHeightSelection}/>
             <Text
               style={[
                 styles.subtitleText,
@@ -164,7 +164,7 @@ export default function App() {
             </Text>
             {userUnits === "imperial" && 
             <>
-            <PickerComponent data={inches}/> 
+            <PickerInchesComponent onValueSelected={handleHeightInSelection}/> 
             <Text
               style={[
                 styles.subtitleText,
@@ -188,7 +188,7 @@ export default function App() {
               height: 120,
             }}
           >
-              <PickerComponent data={weightRange} />
+              <PickerComponent data={weightRange} onValueSelected={handleWeightSelection} />
             <Text
               style={[
                 styles.subtitleText,

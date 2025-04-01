@@ -21,6 +21,12 @@ const profile = () => {
     router.replace("/(public)/login")
   }
 
+  const {userInfo,setUserInfo} = useUserStore((state) => ({
+    userInfo: state.userInfo,
+    setUserInfo: state.setUserInfo
+  })
+  )
+
 
   return (
     <View style={defaultStyles.container}>
@@ -40,7 +46,7 @@ const profile = () => {
         <View style={styles.profileImgContainer}>
           <Image
             style={styles.profileImg}
-            source={require("../../assets/images/profileImg.jpg")}
+            source={userInfo.profileImage}
           />
         </View>
         <TouchableOpacity style={styles.btn}>
@@ -69,15 +75,15 @@ const profile = () => {
 
         <View style={styles.subtitle}>
           <Text style={defaultStyles.btnOutlineText}>Name</Text>
-          <Text style={styles.valueText}>Stevan</Text>
+          <Text style={styles.valueText}>{userInfo.firstName}</Text>
         </View>
         <View style={styles.subtitle}>
           <Text style={defaultStyles.btnOutlineText}>Last name</Text>
-          <Text style={styles.valueText}>Stevanovski</Text>
+          <Text style={styles.valueText}>{userInfo.lastName}</Text>
         </View>
         <View style={styles.subtitle}>
           <Text style={defaultStyles.btnOutlineText}>Age</Text>
-          <Text style={styles.valueText}>24</Text>
+          <Text style={styles.valueText}>{userInfo.age}</Text>
         </View>
       </View>
 

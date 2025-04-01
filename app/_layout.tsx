@@ -36,18 +36,20 @@ export default function RootLayout() {
   });
 
 
-
-  useEffect(() => {
+  useEffect(() =>{
     if (error) throw error;
-  }, [error]);
-    
+  }, [error]); 
+  console.log("Part 1")
+
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+    console.log("Part 2")
+
   }, [loaded]);
 
-  const {userInfo,setUserInfo} = useUserStore((state) => ({
+  const {userInfo, setUserInfo} = useUserStore((state) => ({
     userInfo: state.userInfo,
     setUserInfo: state.setUserInfo
   })
@@ -57,7 +59,7 @@ export default function RootLayout() {
   useEffect(() => {
    
     const inTabsGroup = segments[0] === "(tabs)";
-
+    console.log("Part 3")
     if (user && !inTabsGroup && (userInfo.role === "user")) {
       router.replace("/(tabs)/");      
     } else if (user && !inTabsGroup && (userInfo.role === "admin")) {

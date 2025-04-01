@@ -7,10 +7,18 @@ export const useUserStore = create((set) => ({
 }))
 
 export const useRegInfoStore = create((set) => ({
+    userId: "",
+    setUserId: (newUserId) => set ((state) => ({userId: newUserId})),
+    userFirstName: "",
+    setUserFirstName: (newUserFirstName) => set ((state) => ({userFirstName: newUserFirstName})),
+    userLastName: "",
+    setUserLastName: (newUserLastName) => set ((state) => ({userLastName: newUserLastName})),
     userWeight: "",
     setUserWeight: (newUserWeight) => set ((state) => ({userWeight: newUserWeight})),
     userHeight: "",
     setUserHeight: (newUserHeight) => set ((state) => ({userHeight: newUserHeight})),
+    userHeightIn: "",
+    setUserHeightIn: (newUserHeightIn) => set ((state) => ({userHeightIn: newUserHeightIn})),
     userUnits: "metric",
     setUserUnits: (newUserUnits) => set ((state) => ({userUnits: newUserUnits})),
     userDoB: "01-01-2000",

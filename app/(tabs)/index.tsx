@@ -4,7 +4,7 @@ import { auth } from '@/firebaseConfig'
 import { signOut } from 'firebase/auth'
 import { Link, router } from 'expo-router'
 import { db } from '@/firebaseConfig'
-import { addDoc, collection } from '@firebase/firestore'
+import { addDoc, collection, doc, getDoc } from 'firebase/firestore'
 import { LinearGradient } from 'expo-linear-gradient'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors'
@@ -15,8 +15,6 @@ import { useUserStore } from '@/store/sessionStore'
 
 
 const index = () => {
-
-  const user = auth.currentUser;
 
   const onSignOut = () => {
     signOut(auth);
@@ -29,6 +27,49 @@ const index = () => {
   })
   )
 
+   const fetchUserData = async (userId) => {
+    try {
+      // Validate userId
+      if (!userId) {
+        throw new Error("Invalid userId. Make sure it's provided.");
+      }
+      console.log(userId)
+      // Create a reference to the user document
+      const userDocRef = doc(db, "users", userId);
+  
+      // Fetch the document
+      const userDoc = await getDoc(userDocRef);
+  
+      // Check if the document exists
+      if (userDoc.exists()) {
+        console.log("User data fetched:", userDoc.data());
+        return userDoc.data(); // Return all user data
+      } else {
+        console.warn("No document found for this user.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      throw error; // Re-throw the error to handle it outside the function
+    }
+  }; 
+
+  useEffect(() => {
+    // Fetch all user data on component mount
+    const loadUserData = async () => {
+      try { 
+        const userData = await fetchUserData(userInfo.id);
+        setUserInfo(userData); // Store the fetched data in state
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      }
+    };
+
+    loadUserData();
+  }, [userInfo.id]);
+
+
+
   
   return (
     <View style={defaultStyles.container}>
@@ -37,12 +78,12 @@ const index = () => {
       style={[defaultStyles.background, { paddingTop:60 }]}
     >
       <View style={styles.row}>
-        <Text style={styles.nameText}>Hi Stevo!</Text>
+        <Text style={styles.nameText}>Hi {userInfo.firstName}!</Text>
         <View style={styles.profileImgContainer}>
           <Link href="/(tabs)/profile">
             <Image
               style={styles.profileImg}
-              source={require("../../assets/images/profileImg.jpg")}
+              source={userInfo.profileImage}
             />
           </Link>
         </View>

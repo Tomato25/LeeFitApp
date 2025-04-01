@@ -16,7 +16,8 @@ import { Link, router, Stack } from "expo-router";
 import Colors from "@/constants/Colors";
 import { defaultStyles } from "@/constants/Styles";
 import { db } from "@/firebaseConfig";
-import { addDoc, collection, doc, setDoc } from "@firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { useRegInfoStore } from "@/store/sessionStore";
 
 const register = () => {
   const [email, setEmail] = useState("");
@@ -35,24 +36,32 @@ const register = () => {
   const [errorLastName, setErrorLastName] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(false);
 
+  const {
+   userFirstName,
+   setUserFirstName,
+   userLastName,
+   setUserLastName,
+   setUserId,
+   userId
+  } = useRegInfoStore();
+
   const isPasswordConfirmed = (password: String, repeatPassword: String) => {
-    if (password && repeatPassword && password === repeatPassword) return true;
+    if (password === repeatPassword) return true;
     return false;
   };
 
   const isEmailConfirmed = (email: String, repeatEmail: String) => {
-    if (email && repeatEmail && email === repeatEmail) return true;
+    if (email === repeatEmail) return true;
     return false;
   };
 
-  const usersRef = collection(db, "users");
   let errorMessage;
   const signUp = () => {
     if (!isPasswordConfirmed(password, repeatPassword)) {
       setErrorRepeatPassword(true);
     }
 
-    if (!isEmailConfirmed(password, repeatPassword)) {
+    if (!isEmailConfirmed(email, repeatEmail)) {
       setErrorRepeatEmail(true);
     }
 
@@ -82,18 +91,27 @@ const register = () => {
     }
 
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const userID = userCredential.user.uid;
+  .then((userCredential) => {
+    const userID = userCredential.user.uid;
+    
+    setUserFirstName(firstName)
+    setUserLastName(lastName)
+    const usersRef = doc(db, "users", userID);
 
-        setDoc(doc(usersRef, `${userID}`), {
-          id: userID,
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-          role: "user",
-        });
-        router.replace("/(public)/personalInfoPageOne");
-      })
+   
+    setDoc(usersRef, {
+      id: userID,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      role: "user",
+    })
+    .then((docRef) => {
+      
+      setUserId(userID)
+      console.log(userID)
+      router.replace("/(public)/personalInfoPageOne");
+    })
       .catch((error) => {
         switch (error.code) {
           case "auth/email-already-in-use":
@@ -110,6 +128,11 @@ const register = () => {
             setErrorEmail(true);
             setErrorText(errorMessage);
             break;
+            case "auth/email-already-in-use":
+            errorMessage = "Email alreday in use";
+            setErrorEmail(true);
+            setErrorText(errorMessage);
+            break;
           case "auth/weak-password":
             errorMessage = "Please choose a stronger password";
             setErrorPassword(true);
@@ -121,7 +144,7 @@ const register = () => {
         }
         console.log(error.code + errorMessage);
       });
-  };
+  })};
 
   return (
     <View style={styles.container}>

@@ -5,20 +5,26 @@ import { StyleSheet, View } from "react-native"
 import Colors from '@/constants/Colors';
 import { useRegInfoStore } from '@/store/sessionStore';
 
+
 export default function DoBPicker() {
   const [date, setDate] = useState(dayjs());
 
   const {
     modalVisible,
     setModalVisible,
-    userDoB,
-    setUserDoB
+    setUserDoB,
   } = useRegInfoStore();
 
   useEffect(() => {
-    setUserDoB(date.format("DD/MM/YYYY"))
-    console.log(date)
-  }, [setDate])
+    setUserDoB(date.format('DD/MM/YYYY'));
+  }, [date]);
+
+  const handleDateChange = (params) => {
+    setDate(params.date);
+    setUserDoB(params.date.format('DD/MM/YYYY'));
+    console.log(params.date.format('DD/MM/YYYY'))
+    setModalVisible(false);
+  };
 
   return (
     <View>
@@ -27,20 +33,16 @@ export default function DoBPicker() {
         date={date}
         initialView="year"
         maxDate={dayjs()}
-        onChange={(params) => {setDate(params.date);}}
-        calendarTextStyle={{color: Colors.light.orange, fontFamily:"outfit"}}
+        onChange={handleDateChange}
+        calendarTextStyle={{ color: Colors.light.orange, fontFamily: 'outfit' }}
         selectedItemColor={Colors.light.orange}
-        headerTextStyle={{color: Colors.light.orange, fontFamily:"outfit"}}
+        headerTextStyle={{ color: Colors.light.orange, fontFamily: 'outfit' }}
         headerButtonColor={Colors.light.orange}
-        weekDaysTextStyle={{color: Colors.light.orange, fontFamily:"outfit"}}
-        weekDaysContainerStyle={{borderColor:Colors.light.orange}}	
-        yearContainerStyle={{backgroundColor: Colors.light.blue, borderColor: Colors.light.orange}}	
-        monthContainerStyle={{backgroundColor: Colors.light.blue, borderColor: Colors.light.orange}}	
+        weekDaysTextStyle={{ color: Colors.light.orange, fontFamily: 'outfit' }}
+        weekDaysContainerStyle={{ borderColor: Colors.light.orange }}
+        yearContainerStyle={{ backgroundColor: Colors.light.blue, borderColor: Colors.light.orange }}
+        monthContainerStyle={{ backgroundColor: Colors.light.blue, borderColor: Colors.light.orange }}
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-    
-});
