@@ -19,6 +19,7 @@
     "@firebase/firestore": "^4.6.5",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^6.0.2",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "expo": "^51.0.38",
     "expo-auth-session": "~5.5.2",
